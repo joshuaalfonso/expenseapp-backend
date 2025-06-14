@@ -22,15 +22,15 @@ categories.get('/',  async(c) => {
 categories.post('/', async (c) => {
   const body = await c.req.json();
 
-  const { id, category_name, category_icon, date_created } = body;
+  const { id, category_name, category_icon } = body;
 
   const {user_id} = c.get('jwtPayload');
 
   try {
     const [result] = await conn.execute(
-      `INSERT INTO categories (id, user_id, category_name, category_icon, date_created)
-       VALUES (?, ?, ?, ?, ?)`,
-      [id, user_id, category_name, category_icon, date_created]
+      `INSERT INTO categories (id, user_id, category_name, category_icon)
+       VALUES (?, ?, ?, ?)`,
+      [id, user_id, category_name, category_icon]
     );
 
     return c.json({ success: true, result });
