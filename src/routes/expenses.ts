@@ -47,7 +47,7 @@ expenses.get('/page/:page', async (c) => {
 
   const {user_id} = c.get('jwtPayload');
 
-  const limit = 4;
+  const limit = 10;
   const offset = (page - 1) * limit;
 
   const [rows] = await conn.execute(
