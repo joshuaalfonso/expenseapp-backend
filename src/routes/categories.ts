@@ -47,17 +47,17 @@ categories.put('/:id', async (c) => {
   const id = c.req.param('id');
   const body = await c.req.json();
 
-  const { category_name, category_icon, date_created } = body;
+  const { category_name, category_icon} = body;
 
   try {
     const [result] = await conn.execute(
       `UPDATE 
         categories
        SET 
-        category_name = ?, category_icon = ?, date_created = ?
+        category_name = ?, category_icon = ?
        WHERE 
         id = ?`,
-      [category_name, category_icon, date_created, id]
+      [category_name, category_icon, id]
     );
 
     if ((result as any[]).length === 0) {
