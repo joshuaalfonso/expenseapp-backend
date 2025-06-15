@@ -41,60 +41,68 @@ expenses.get('/', async (c) => {
 })
 
 
-expenses.get('/page/:page', async (c) => {
+expenses.get('/page/:page/sortBy/:sortByValue', async (c) => {
 
   const page = parseInt(c.req.param('page') || '1');
+  
+  const sortBy = c.req.param('sortByValue') || 'DESC';
 
   const {user_id} = c.get('jwtPayload');
 
   const limit = 10;
   const offset = (page - 1) * limit;
 
-  const [rows] = await conn.execute(
-    `
-      SELECT 
-        e.id,
-        e.date,
-        c.id AS category_id,
-        c.category_name,
-        c.category_icon,
-        e.amount,
-        e.description,
-        u.id AS user_id,
-        u.name,
-        u.email,
-        u.picture
-      FROM 
-        expenses AS e
-      LEFT JOIN
-        categories AS c
-        ON e.category_id = c.id
-      LEFT JOIN
-        users AS u
-        ON e.user_id = u.id
-      WHERE 
-        e.user_id = ? 
-        ORDER BY date 
-        DESC LIMIT ? OFFSET ?
-    `,
-    [user_id, String(limit), String(offset)]
-  );
+  try {
+    const [rows] = await conn.execute(
+      `
+        SELECT 
+          e.id,
+          e.date,
+          c.id AS category_id,
+          c.category_name,
+          c.category_icon,
+          e.amount,
+          e.description,
+          u.id AS user_id,
+          u.name,
+          u.email,
+          u.picture
+        FROM 
+          expenses AS e
+        LEFT JOIN
+          categories AS c
+          ON e.category_id = c.id
+        LEFT JOIN
+          users AS u
+          ON e.user_id = u.id
+        WHERE 
+          e.user_id = ? 
+          ORDER BY date 
+          ${sortBy} LIMIT ? OFFSET ?
+      `,
+      [user_id, String(limit), String(offset)]
+    );
 
-  const [totalResponse] = await conn.execute(
-    `SELECT COUNT(*) as total FROM expenses WHERE user_id = ?`,
-    [user_id]
-  );
+    const [totalResponse] = await conn.execute(
+      `SELECT COUNT(*) as total FROM expenses WHERE user_id = ?`,
+      [user_id]
+    );
 
-  const total = (totalResponse as any[])[0].total;
-  // console.log(total)
+    const total = (totalResponse as any[])[0].total;
+    // console.log(total)
 
-  return c.json({
-    data: rows,                
-    currentPage: page,         
-    perPage: limit, 
-    total,
-    totalPages: Math.ceil(total / limit)
-  });
+    return c.json({
+      data: rows,                
+      currentPage: page,         
+      perPage: limit, 
+      total,
+      totalPages: Math.ceil(total / limit)
+    });
+  } 
+
+  catch(error) {
+    return c.json({ message: 'Failed to fetch data' }, 500)
+  }
 
 })
 
