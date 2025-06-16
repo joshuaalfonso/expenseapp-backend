@@ -41,7 +41,7 @@ dashboard.get('/summary', async (c) => {
     const [categoryRows] = await conn.execute(
         `
             SELECT 
-                category_id, categories.category_name, COUNT(*) AS count
+                category_id, categories.category_name, SUM(amount) AS total
             FROM 
                 expenses
             LEFT JOIN
@@ -49,11 +49,11 @@ dashboard.get('/summary', async (c) => {
             ON
                 expenses.category_id = categories.id
             WHERE 
-                expenses.user_id = ?
+                expenses.user_id = ? AND YEAR(date) = YEAR(CURRENT_DATE())
             GROUP BY 
                 category_id
             ORDER 
-                BY count DESC
+                BY total DESC
             LIMIT 5
         `,
         [user_id]

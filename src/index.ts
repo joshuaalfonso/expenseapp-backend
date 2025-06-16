@@ -11,7 +11,7 @@ const app = new Hono();
 app.use('*', cors());
 
 app.get('/', (c) => {
-  return c.text('Hello Hono!')
+  return c.text('Hello Hono!') 
 })
 
 app.route('/categories', categories);
